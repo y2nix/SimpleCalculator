@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "1039455140973",
+    "project_id": "calculator-b1dce",
+    "storage_bucket": "calculator-b1dce.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1039455140973:android:3306b749b744941d4c5364",
+        "android_client_info": {
+          "package_name": "com.example.calculatorsimple"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAe97vLPWupKvVvYwv0ArdwHkaxPlnydFk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1039455140973:android:f448046cb8e8ca9b4c5364",
+        "android_client_info": {
+          "package_name": "com.mainor.simplecalculator"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAe97vLPWupKvVvYwv0ArdwHkaxPlnydFk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
