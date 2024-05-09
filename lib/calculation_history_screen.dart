@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart'; // Import DateFormat
+import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
 
 class CalculationHistoryScreen extends StatefulWidget {
   @override
@@ -9,7 +9,8 @@ class CalculationHistoryScreen extends StatefulWidget {
 }
 
 class _CalculationHistoryScreenState extends State<CalculationHistoryScreen> {
-  List<String> _calculationHistory = [];
+  FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  List<Map<String, dynamic>> _calculationHistory = [];
 
   @override
   void initState() {
@@ -18,19 +19,32 @@ class _CalculationHistoryScreenState extends State<CalculationHistoryScreen> {
   }
 
   void _loadHistory() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _calculationHistory =
-          prefs.getStringList('calculation_history') ?? <String>[];
-    });
+    try {
+      QuerySnapshot querySnapshot =
+      await _firestore.collection('calculation_history').get();
+      setState(() {
+        _calculationHistory = List<Map<String, dynamic>>.from(querySnapshot.docs
+            .map((DocumentSnapshot doc) => doc.data())
+            .toList());
+      });
+    } catch (e) {
+      print('Error loading history from Firestore: $e');
+    }
   }
 
-  Future<void> _clearHistory() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove('calculation_history');
-    setState(() {
-      _calculationHistory.clear();
-    });
+  void _clearHistory() async {
+    try {
+      QuerySnapshot querySnapshot =
+      await _firestore.collection('calculation_history').get();
+      for (DocumentSnapshot doc in querySnapshot.docs) {
+        await doc.reference.delete();
+      }
+      setState(() {
+        _calculationHistory.clear();
+      });
+    } catch (e) {
+      print('Error clearing history from Firestore: $e');
+    }
   }
 
   @override
@@ -44,25 +58,15 @@ class _CalculationHistoryScreenState extends State<CalculationHistoryScreen> {
           : ListView.builder(
         itemCount: _calculationHistory.length,
         itemBuilder: (context, index) {
-          String historyEntry = _calculationHistory[index];
-          List<String> parts =
-          historyEntry.split('='); // Split equation and result
-          if (parts.length >= 2) {
-            String equation = parts[0].trim();
-            String result = parts[1].trim();
-            // Check if there's a datetime part
-            String formattedDateTime = parts.length > 2
-                ? DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.parse(parts[2].trim()))
-                : '';
-            return ListTile(
-              title: Text('$equation = $result'),
-              subtitle: Text(formattedDateTime), // Display formatted date and time
-            );
-          } else {
-            return ListTile(
-              title: Text('Invalid history entry'),
-            );
-          }
+          Map<String, dynamic> historyEntry = _calculationHistory[index];
+          String equation = historyEntry['calculation'];
+          String result = equation.split('=')[1].trim();
+          String timestamp = DateFormat('yyyy-MM-dd HH:mm:ss')
+              .format(historyEntry['timestamp'].toDate());
+          return ListTile(
+            title: Text(equation),
+            subtitle: Text('$result ($timestamp)'),
+          );
         },
       ),
       floatingActionButton: FloatingActionButton(
